@@ -8,12 +8,25 @@
   const rail = $("product-rail");
   let selected = 0;
   let timer;
+  const shareableFiles = new Map();
 
   const formatPrice = (price) => price ? (typeof price === "number" ? `${price.toLocaleString("fr-FR")} $` : price) : "À confirmer";
   const waLink = (product) => {
-    const message = `Bonjour M Business, je souhaite commander ${product.name}, pointure ${product.size}. Pouvez-vous me confirmer le prix et la disponibilité ?`;
+    const photoUrl = new URL(product.image, window.location.origin).href;
+    const message = `Bonjour M Business, je souhaite commander ${product.name}, pointure ${product.size}. Pouvez-vous me confirmer le prix et la disponibilité ?\n\nPhoto du modèle : ${photoUrl}`;
     return `https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`;
   };
+
+  function prepareShareFile(product) {
+    if (shareableFiles.has(product.id)) return;
+    const filename = product.image.split("/").pop();
+    fetch(product.image).then((response) => {
+      if (!response.ok) throw new Error("Photo indisponible");
+      return response.blob();
+    }).then((blob) => {
+      shareableFiles.set(product.id, new File([blob], filename, { type: blob.type || "image/webp" }));
+    }).catch(() => {});
+  }
 
   products.forEach((product, index) => {
     const card = document.createElement("button");
@@ -38,6 +51,7 @@
   function show(index) {
     selected = (index + products.length) % products.length;
     const product = products[selected];
+    prepareShareFile(product);
     featuredImage.classList.add("is-changing");
     window.setTimeout(() => {
       featuredImage.src = product.image;
@@ -64,6 +78,18 @@
   }
   $("previous-product").addEventListener("click", () => { show(selected - 1); startAutoplay(); });
   $("next-product").addEventListener("click", () => { show(selected + 1); startAutoplay(); });
+  $("photo-share-button").addEventListener("click", () => {
+    const product = products[selected];
+    const file = shareableFiles.get(product.id);
+    const text = `À envoyer à M Business sur WhatsApp (+243 817 100 414) : ${product.name}, pointure ${product.size}. Merci de confirmer le prix et la disponibilité.`;
+    if (file && navigator.share && navigator.canShare?.({ files: [file] })) {
+      navigator.share({ files: [file], title: `Commande M Business — ${product.name}`, text }).catch((error) => {
+        if (error.name !== "AbortError") window.open(waLink(product), "_blank", "noopener,noreferrer");
+      });
+      return;
+    }
+    window.open(waLink(product), "_blank", "noopener,noreferrer");
+  });
   $("featured-product").addEventListener("mouseenter", () => window.clearInterval(timer));
   $("featured-product").addEventListener("mouseleave", startAutoplay);
   $("collection-left").addEventListener("click", () => rail.scrollBy({ left: -340, behavior: "smooth" }));
