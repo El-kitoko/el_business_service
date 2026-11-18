@@ -1,13 +1,13 @@
-# M Business
+# M Business — Babouches pour elle
 
-Boutique vitrine responsive de babouches féminines, avec catalogue défilant, filtres, prix visibles et commande WhatsApp directe.
+Boutique statique responsive inspirée du parcours de la vidéo de référence : sélection animée, fiche produit, prix, pointure et commande WhatsApp.
 
-## Publication
+## Mise à jour du catalogue
 
-Projet statique, sans build. Dans Vercel, définir le Root Directory sur `m-business`. Les headers de sécurité sont configurés dans `vercel.json`.
+Modifier `assets/catalog.js`. Chaque modèle possède `name`, `detail`, `size`, `image` et `price`. Remplacer `price: null` par le prix réel (nombre en dollars ou texte formaté). Les photos sont dans `assets/products/`.
 
-## À personnaliser avant les ventes
+## Commandes et paiements
 
-- Remplacer les modèles, prix d'exemple et photos de démonstration dans `index.html`.
-- Vérifier le numéro WhatsApp de commande `243999849356` et les moyens de paiement affichés.
-- Remplacer les visuels par les photos réelles des produits.
+Le bouton WhatsApp ouvre une conversation avec le numéro principal `+243 817 100 414` et préremplit le nom du modèle et sa pointure. La page affiche également les coordonnées M-Pesa et Airtel Money fournies.
+
+Le site ne collecte pas de données de paiement et ne stocke pas de données client. Aucun secret Supabase n'est nécessaire pour cette version.
